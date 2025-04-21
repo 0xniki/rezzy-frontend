@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Tab } from '@headlessui/react';
 import HoursSetup from '@/components/HoursSetup';
 import TablesSetup from '@/components/TableSetup';
+import SpecialHoursSetup from '@/components/SpecialHoursSetup';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -58,6 +59,18 @@ export default function Home() {
               >
                 tables & layout
               </Tab>
+              <Tab
+                className={({ selected }) =>
+                  classNames(
+                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                    selected
+                      ? 'bg-indigo-600 text-white shadow'
+                      : 'text-indigo-700 hover:bg-indigo-200'
+                  )
+                }
+              >
+                special days
+              </Tab>
             </Tab.List>
             <Tab.Panels>
               <Tab.Panel>
@@ -68,6 +81,11 @@ export default function Home() {
               <Tab.Panel>
                 <div className="p-2">
                   <TablesSetup />
+                </div>
+              </Tab.Panel>
+              <Tab.Panel>
+                <div className="p-2">
+                  <SpecialHoursSetup />
                 </div>
               </Tab.Panel>
             </Tab.Panels>

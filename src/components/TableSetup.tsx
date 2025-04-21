@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import Draggable from 'react-draggable';
+import { useState, useEffect, useRef } from 'react';
 import { getTables, createTable, updateTable, deleteTable, TableCreate, Table } from '@/lib/api';
 
 export default function TableSetup() {
@@ -23,7 +22,10 @@ export default function TableSetup() {
   
   // Canvas state
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
-  const [dragging, setDragging] = useState(false);
+  
+  // Drag state
+  const [dragging, setDragging] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     fetchTables();
@@ -145,36 +147,58 @@ export default function TableSetup() {
     }
   };
   
-  const handleDragStop = (tableId: string, e: any, data: any) => {
-    setDragging(false);
+  // Handle mouse events for dragging
+  const handleMouseDown = (tableId: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setDragging(tableId);
+  };
+  
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragging || !canvasRef.current) return;
     
-    // Find the table
-    const table = tables.find(t => t.id === tableId);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Don't let tables go outside the canvas
+    const table = tables.find(t => t.id === dragging);
     if (!table) return;
     
-    // Update the location
-    const newLocation = `${data.x},${data.y}`;
+    const width = 50 + table.max_capacity * 10;
+    const height = 50 + table.max_capacity * 5;
     
-    // Update local state first (optimistic update)
-    setTables(tables.map(t => {
-      if (t.id === tableId) {
-        return {
-          ...t,
-          location: newLocation,
-          x: data.x,
-          y: data.y
-        };
-      }
-      return t;
-    }));
+    // Calculate bounded coordinates
+    const boundedX = Math.max(0, Math.min(canvasSize.width - width, x));
+    const boundedY = Math.max(0, Math.min(canvasSize.height - height, y));
     
-    // Then send to server (don't wait with async/await in the event handler)
-    updateTable(tableId, {
-      ...table,
-      location: newLocation
-    }).catch(err => {
+    // Update the table position locally
+    setTables(tables.map(t => 
+      t.id === dragging 
+        ? { ...t, x: boundedX, y: boundedY } 
+        : t
+    ));
+  };
+  
+  const handleMouseUp = async () => {
+    if (!dragging) return;
+    
+    // Find the table
+    const table = tables.find(t => t.id === dragging);
+    if (!table) return;
+    
+    // Update the location in the database
+    const newLocation = `${table.x},${table.y}`;
+    
+    try {
+      await updateTable(table.id, {
+        ...table,
+        location: newLocation
+      });
+    } catch (err) {
       console.error('Error updating table position:', err);
-    });
+    }
+    
+    setDragging(null);
   };
   
   if (loading && tables.length === 0) {
@@ -352,38 +376,39 @@ export default function TableSetup() {
               <p className="text-sm text-gray-500 mb-4">drag tables to position them on the layout</p>
               
               <div 
-                className="border border-gray-300 bg-white relative"
+                ref={canvasRef}
+                className="border border-gray-300 bg-white relative cursor-move"
                 style={{ width: `${canvasSize.width}px`, height: `${canvasSize.height}px`, margin: '0 auto' }}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
               >
                 {tables.map((table) => {
                   const x = typeof table.x === 'number' ? table.x : 100;
                   const y = typeof table.y === 'number' ? table.y : 100;
                   
                   return (
-                    <Draggable
+                    <div 
                       key={table.id}
-                      defaultPosition={{ x, y }}
-                      onStart={() => setDragging(true)}
-                      onStop={(e, data) => handleDragStop(table.id, e, data)}
-                      bounds="parent"
+                      className={`absolute p-2 rounded-lg border-2 ${
+                        table.is_shared ? 'bg-purple-100 border-purple-400' : 'bg-indigo-100 border-indigo-400'
+                      } ${dragging === table.id ? 'cursor-grabbing z-10' : 'cursor-grab'}`}
+                      style={{ 
+                        width: `${50 + table.max_capacity * 10}px`, 
+                        height: `${50 + table.max_capacity * 5}px`,
+                        left: `${x}px`,
+                        top: `${y}px`,
+                        touchAction: 'none'
+                      }}
+                      onMouseDown={handleMouseDown(table.id)}
                     >
-                      <div 
-                        className={`absolute cursor-move p-2 rounded-lg border-2 ${
-                          table.is_shared ? 'bg-purple-100 border-purple-400' : 'bg-indigo-100 border-indigo-400'
-                        }`}
-                        style={{ 
-                          width: `${50 + table.max_capacity * 10}px`, 
-                          height: `${50 + table.max_capacity * 5}px`,
-                        }}
-                      >
-                        <div className="font-bold text-center">
-                          {table.table_number}
-                        </div>
-                        <div className="text-xs text-center">
-                          {table.max_capacity} seats
-                        </div>
+                      <div className="font-bold text-center">
+                        {table.table_number}
                       </div>
-                    </Draggable>
+                      <div className="text-xs text-center">
+                        {table.max_capacity} seats
+                      </div>
+                    </div>
                   );
                 })}
               </div>

@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000; /* Changed from #171717 to pure black for better contrast */
 }
 
 @theme inline {
@@ -15,7 +15,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #ffffff; /* Changed from #ededed to pure white for better contrast */
   }
 }
 
@@ -23,4 +23,82 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Added additional styling for better text visibility */
+.text-gray-500 {
+  color: #2d3748 !important; /* Much darker gray */
+}
+
+.text-gray-600 {
+  color: #1a202c !important; /* Almost black */
+}
+
+/* Make sure form inputs have enough contrast */
+input, select, textarea {
+  color: #000000;
+}
+
+/* Fix table text visibility */
+table th, table td {
+  color: #000000 !important; 
+}
+
+/* Fix restaurant floor layout table visibility */
+[class*="bg-indigo-100"], [class*="bg-purple-100"] {
+  border-width: 2px !important;
+  color: #000000 !important;
+}
+
+/* Fix title visibility */
+h1, .text-xl, .text-2xl, .text-3xl, .font-bold, .font-semibold {
+  color: #000000 !important;
+}
+
+/* Fix navigation and header colors */
+.bg-indigo-600, .bg-purple-600, .bg-green-600 {
+  color: #ffffff !important;
+}
+
+/* Fix selected tab text */
+.bg-indigo-600.text-white, 
+[class*="bg-indigo-600"] {
+  color: #ffffff !important;
+}
+
+/* Force white text on all colored buttons */
+.bg-indigo-600, .bg-purple-600, .bg-green-600, 
+.bg-indigo-700, .bg-purple-700, .bg-green-700,
+button[class*="bg-indigo-"], button[class*="bg-purple-"], button[class*="bg-green-"] {
+  color: #ffffff !important;
+}
+
+/* Force better contrast for specific components */
+.text-gray-700, .text-gray-800 {
+  color: #1a202c !important;
+}
+
+.bg-gray-50 h3.font-medium,
+.bg-white h3.font-medium,
+form h3,
+form .font-medium,
+.font-medium.mb-3,
+.font-medium.mb-2 {
+  color: #000000 !important;
+}
+
+/* Fix all form labels */
+label, .block.text-sm.font-medium.mb-1 {
+  color: #000000 !important;
+}
+
+/* Fix field help text */
+.text-xs.text-gray-500 {
+  color: #333333 !important;
+}
+
+/* Ensure white text stays on colored buttons */
+.bg-indigo-600, .bg-purple-600, .bg-green-600, 
+.bg-indigo-700, .bg-purple-700, .bg-green-700 {
+  color: #ffffff !important;
 }
