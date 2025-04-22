@@ -63,7 +63,7 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
     try {
       const data = await getHours();
       setHours(data);
-      generateTimeSlots(formData.date);
+      generateTimeSlots(selectedDate);
     } catch (err) {
       console.error('Error fetching hours:', err);
       setError('Failed to load restaurant hours. Please try again.');
@@ -72,6 +72,7 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
   
   const generateTimeSlots = async (date: Date) => {
     try {
+      setError(null);
       const dayOfWeek = date.getDay();
       // Convert to 0-6 where Monday is 0
       const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -108,8 +109,6 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
         dayHours.open_time,
         dayHours.last_reservation_time
       );
-      
-      setError(null);
     } catch (err) {
       console.error('Error generating time slots:', err);
       setError('Failed to load available time slots.');
@@ -211,6 +210,22 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
       setLoading(true);
       setError(null);
       
+      // Validate required fields before submission
+      if (!formData.customer_name) {
+        setError('Customer name is required');
+        setLoading(false);
+        return;
+      }
+      
+      // For small parties, contact info is optional due to our backend changes
+      const isSmallParty = formData.party_size < 6;
+      
+      if (!isSmallParty && !formData.customer_email && !formData.customer_phone) {
+        setError('Either email or phone is required for parties of 6 or more');
+        setLoading(false);
+        return;
+      }
+      
       await createReservation({
         party_size: formData.party_size,
         reservation_date: format(formData.date, 'yyyy-MM-dd'),
@@ -224,6 +239,9 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
           notes: ''
         },
         table_ids: formData.selectedTables
+      }).catch(error => {
+        console.error('Create reservation error:', error);
+        throw error;
       });
       
       setSuccess(true);

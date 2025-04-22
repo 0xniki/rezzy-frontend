@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000,
 });
 
 // Table types
@@ -97,8 +98,13 @@ export interface AvailabilityRequest {
 
 // Tables API
 export const getTables = async (): Promise<Table[]> => {
-  const response = await api.get('/tables');
-  return response.data;
+  try {
+    const response = await api.get('/tables');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching tables:', error);
+    return [];
+  }
 };
 
 export const createTable = async (table: TableCreate): Promise<Table> => {
@@ -117,8 +123,13 @@ export const deleteTable = async (id: string): Promise<void> => {
 
 // Hours API
 export const getHours = async (): Promise<RestaurantHours[]> => {
-  const response = await api.get('/hours');
-  return response.data;
+  try {
+    const response = await api.get('/hours');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching hours:', error);
+    return [];
+  }
 };
 
 export const setHours = async (hours: RestaurantHoursCreate): Promise<RestaurantHours> => {
@@ -131,13 +142,18 @@ export const getSpecialHours = async (
   dateFrom?: string,
   dateTo?: string
 ): Promise<SpecialHours[]> => {
-  const params = new URLSearchParams();
-  if (dateFrom) params.append('date_from', dateFrom);
-  if (dateTo) params.append('date_to', dateTo);
-  
-  const url = '/special-hours' + (params.toString() ? `?${params.toString()}` : '');
-  const response = await api.get(url);
-  return response.data;
+  try {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+    
+    const url = '/special-hours' + (params.toString() ? `?${params.toString()}` : '');
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching special hours:', error);
+    return [];
+  }
 };
 
 export const getSpecialHoursByDate = async (
@@ -166,8 +182,13 @@ export const deleteSpecialHours = async (id: string): Promise<void> => {
 
 // Reservation API
 export const getReservations = async (params: any): Promise<any[]> => {
-  const response = await api.get('/reservations', { params });
-  return response.data;
+  try {
+    const response = await api.get('/reservations', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching reservations:', error);
+    return [];
+  }
 };
 
 export const getReservation = async (id: string): Promise<any> => {
@@ -176,23 +197,51 @@ export const getReservation = async (id: string): Promise<any> => {
 };
 
 export const createReservation = async (reservation: ReservationCreate): Promise<any> => {
-  const response = await api.post('/reservations', reservation);
-  return response.data;
+  try {
+    const response = await api.post('/reservations', reservation);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error creating reservation:', error);
+    if (error.response) {
+      throw new Error(`Server error: ${error.response.status} - ${
+        error.response.data?.detail || 'Unknown error'
+      }`);
+    } else if (error.request) {
+      throw new Error('No response from server. Network issue or server down.');
+    } else {
+      throw new Error(`Request error: ${error.message}`);
+    }
+  }
 };
 
 export const updateReservationStatus = async (id: string, status: string): Promise<any> => {
-  const response = await api.patch(`/reservations/${id}/status?status=${status}`);
-  return response.data;
+  try {
+    const response = await api.patch(`/reservations/${id}/status?status=${status}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating reservation status:', error);
+    throw error;
+  }
 };
 
 export const deleteReservation = async (id: string): Promise<void> => {
-  await api.delete(`/reservations/${id}`);
+  try {
+    await api.delete(`/reservations/${id}`);
+  } catch (error) {
+    console.error('Error deleting reservation:', error);
+    throw error;
+  }
 };
 
 // Availability API
 export const checkAvailability = async (request: AvailabilityRequest): Promise<any> => {
-  const response = await api.post('/availability', request);
-  return response.data;
+  try {
+    const response = await api.post('/availability', request);
+    return response.data;
+  } catch (error) {
+    console.error('Error checking availability:', error);
+    throw error;
+  }
 };
 
 export default api;

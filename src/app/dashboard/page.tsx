@@ -3,13 +3,23 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getTables, getHours, Table, RestaurantHours } from '@/lib/api';
+import { format } from 'date-fns';
+import { getTables, getHours, getSpecialHoursByDate, Table, RestaurantHours } from '@/lib/api';
+import DateNavigator from '@/components/DateNavigator';
+import TableReservationsModal from '@/components/TableReservationsModal';
 
 export default function Dashboard() {
   const [tables, setTables] = useState<Table[]>([]);
   const [hours, setHours] = useState<RestaurantHours[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const router = useRouter();
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+
+  const [weeklyHours, setWeeklyHours] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +58,9 @@ export default function Dashboard() {
         
         setTables(tablesWithCoords);
         setHours(hoursData);
+        
+        // Also fetch the weekly hours for the selected date
+        await fetchWeeklyHours(selectedDate);
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
@@ -57,6 +70,83 @@ export default function Dashboard() {
     
     fetchData();
   }, [router]);
+
+  const fetchWeeklyHours = async (date: Date) => {
+    try {
+      const regularHours = await getHours();
+      
+      // Get start of week (Monday)
+      const dayOfWeek = date.getDay();
+      const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Adjust for Sunday
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - diff);
+      
+      // Get all dates for the week
+      const weekDates = Array.from({length: 7}, (_, i) => {
+        const currentDate = new Date(monday);
+        currentDate.setDate(monday.getDate() + i);
+        return format(currentDate, 'yyyy-MM-dd');
+      });
+      
+      // Batch fetch all special hours for the week
+      const specialDaysPromises = weekDates.map(date => getSpecialHoursByDate(date));
+      const specialDays = await Promise.all(specialDaysPromises);
+      
+      // Initialize weekly hours with regular hours
+      const weekHours = [];
+      
+      // For each day of the week
+      for (let i = 0; i < 7; i++) {
+        const specialDay = specialDays[i];
+        
+        if (specialDay) {
+          // Use special hours
+          weekHours.push({
+            day: i,
+            date: weekDates[i],
+            isSpecial: true,
+            name: specialDay.name,
+            isClosed: specialDay.is_closed,
+            openTime: specialDay.is_closed ? null : specialDay.open_time,
+            closeTime: specialDay.is_closed ? null : specialDay.close_time
+          });
+        } else {
+          // Use regular hours
+          const dayHours = regularHours.find(h => h.day_of_week === i);
+          weekHours.push({
+            day: i,
+            date: weekDates[i],
+            isSpecial: false,
+            name: null,
+            isClosed: !dayHours,
+            openTime: dayHours ? dayHours.open_time : null,
+            closeTime: dayHours ? dayHours.close_time : null
+          });
+        }
+      }
+      
+      setWeeklyHours(weekHours);
+    } catch (err) {
+      console.error('Error fetching weekly hours:', err);
+    }
+  };
+
+  const handleDateChange = (date: Date | null) => {
+    if (date && selectedDate.toDateString() !== date.toDateString()) {
+      setSelectedDate(date);
+      fetchWeeklyHours(date);
+    }
+  };
+
+  const handleTableClick = (table: Table) => {
+    setSelectedTable(table);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedTable(null);
+  };
 
   if (loading) {
     return <div className="text-center py-4">loading restaurant data...</div>;
@@ -83,6 +173,9 @@ export default function Dashboard() {
         </div>
       </div>
       
+      {/* Date Navigator Component */}
+      <DateNavigator onDateChange={handleDateChange} />
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">restaurant hours</h2>
@@ -93,20 +186,37 @@ export default function Dashboard() {
                   <th className="py-2 px-4 text-left">day</th>
                   <th className="py-2 px-4 text-left">open</th>
                   <th className="py-2 px-4 text-left">close</th>
+                  <th className="py-2 px-4 text-left">notes</th>
                 </tr>
               </thead>
               <tbody>
                 {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day, index) => {
-                  const dayHours = hours.find(h => h.day_of_week === index);
+                  const dayData = weeklyHours[index];
+                  const isToday = dayData && new Date(dayData.date).toDateString() === new Date().toDateString();
                   
                   return (
-                    <tr key={index} className="border-t">
+                    <tr key={index} className={`border-t ${isToday ? 'bg-blue-50' : ''}`}>
                       <td className="py-2 px-4 capitalize">{day}</td>
                       <td className="py-2 px-4">
-                        {dayHours ? dayHours.open_time.slice(0, 5) : 'closed'}
+                        {dayData?.isClosed ? (
+                          <span className="text-red-600">closed</span>
+                        ) : (
+                          dayData?.openTime ? dayData.openTime.slice(0, 5) : 'not set'
+                        )}
                       </td>
                       <td className="py-2 px-4">
-                        {dayHours ? dayHours.close_time.slice(0, 5) : 'closed'}
+                        {dayData?.isClosed ? (
+                          <span className="text-red-600">closed</span>
+                        ) : (
+                          dayData?.closeTime ? dayData.closeTime.slice(0, 5) : 'not set'
+                        )}
+                      </td>
+                      <td className="py-2 px-4">
+                        {dayData?.isSpecial && (
+                          <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+                            {dayData.name}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -147,6 +257,7 @@ export default function Dashboard() {
       
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">restaurant layout</h2>
+        <p className="text-sm text-gray-500 mb-4">click on a table to view its reservations for today</p>
         
         <div 
           className="border border-gray-300 bg-white relative mx-auto"
@@ -161,13 +272,14 @@ export default function Dashboard() {
                 key={table.id}
                 className={`absolute p-2 rounded-lg border-2 ${
                   table.is_shared ? 'bg-purple-100 border-purple-400' : 'bg-indigo-100 border-indigo-400'
-                }`}
+                } cursor-pointer hover:shadow-lg transition-shadow duration-200`}
                 style={{ 
                   width: `${50 + table.max_capacity * 10}px`, 
                   height: `${50 + table.max_capacity * 5}px`,
                   left: `${x}px`,
                   top: `${y}px`
                 }}
+                onClick={() => handleTableClick(table)}
               >
                 <div className="font-bold text-center">
                   {table.table_number}
@@ -180,6 +292,17 @@ export default function Dashboard() {
           })}
         </div>
       </div>
+
+      {/* Table Reservations Modal */}
+      {selectedTable && (
+        <TableReservationsModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          tableId={selectedTable.id}
+          tableNumber={selectedTable.table_number}
+          date={selectedDate}
+        />
+      )}
     </div>
   );
 }
