@@ -160,13 +160,12 @@ export default function Dashboard() {
   return (
     <div className="py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">frali dashboard</h1>
       </div>
       
       {/* Date Navigator Component */}
       <DateNavigator onDateChange={handleDateChange} />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">restaurant hours</h2>
           <div className="overflow-x-auto">
@@ -243,12 +242,9 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">restaurant layout</h2>
-        <p className="text-sm text-gray-500 mb-4">click on a table to view its reservations for today</p>
-        
         <div 
           className="border border-gray-300 bg-white relative mx-auto"
           style={{ width: '800px', height: '600px' }}
