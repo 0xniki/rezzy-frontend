@@ -25,6 +25,7 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
   const [availableTables, setAvailableTables] = useState<any[]>([]);
   const [isValidTime, setIsValidTime] = useState(true);
   const [checkedAvailability, setCheckedAvailability] = useState(false);
+  const [hoursLoaded, setHoursLoaded] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -42,28 +43,23 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
   // Time slots
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   
+  // First load hours, then generate time slots
   useEffect(() => {
     fetchHours();
   }, []);
   
+  // When hours are loaded or date changes, generate time slots
   useEffect(() => {
-    // Reset form when date changes
-    setFormData({
-      ...formData,
-      date: selectedDate,
-      time: '',
-      selectedTables: []
-    });
-    setCheckedAvailability(false);
-    setAvailableTables([]);
-    generateTimeSlots(selectedDate);
-  }, [selectedDate]);
+    if (hoursLoaded) {
+      generateTimeSlots(selectedDate);
+    }
+  }, [selectedDate, hoursLoaded]);
   
   const fetchHours = async () => {
     try {
       const data = await getHours();
       setHours(data);
-      generateTimeSlots(selectedDate);
+      setHoursLoaded(true);
     } catch (err) {
       console.error('Error fetching hours:', err);
       setError('Failed to load restaurant hours. Please try again.');
