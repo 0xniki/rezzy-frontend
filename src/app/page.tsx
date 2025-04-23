@@ -1,106 +1,52 @@
 "use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Tab } from '@headlessui/react';
-import HoursSetup from '@/components/HoursSetup';
-import TablesSetup from '@/components/TableSetup';
-import SpecialHoursSetup from '@/components/SpecialHoursSetup';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getTables } from '@/lib/api';
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
+export default function HomePage() {
+  const router = useRouter();
 
-export default function Home() {
-  const [setup, setSetup] = useState<boolean>(false);
+  useEffect(() => {
+    const checkAuthAndTables = async () => {
+      // Check if the user is logged in
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      
+      if (!isLoggedIn) {
+        // Not logged in, redirect to login
+        router.push('/login');
+        return;
+      }
+      
+      try {
+        // Check if any tables exist to determine where to send the user
+        const tables = await getTables();
+        
+        if (tables.length > 0) {
+          // Tables exist, send to dashboard
+          router.push('/dashboard');
+        } else {
+          // No tables, send to setup
+          router.push('/setup');
+        }
+      } catch (error) {
+        console.error('Error checking tables:', error);
+        // On error, default to setup
+        router.push('/setup');
+      }
+    };
+    
+    checkAuthAndTables();
+  }, [router]);
 
   return (
-    <div className="py-6">
-      <h1 className="text-3xl font-bold mb-6">restaurant setup</h1>
-      
-      {!setup ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h2 className="text-xl mb-4">welcome to rezzy</h2>
-            <p className="mb-6 text-gray-600">let's set up your restaurant layout and hours</p>
-            <button
-              onClick={() => setSetup(true)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-            >
-              start setup
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow p-6">
-          <Tab.Group>
-            <Tab.List className="flex space-x-2 rounded-xl bg-indigo-100 p-1 mb-6">
-              <Tab
-                className={({ selected }) =>
-                  classNames(
-                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                    selected
-                      ? 'bg-indigo-600 text-white shadow'
-                      : 'text-indigo-700 hover:bg-indigo-200'
-                  )
-                }
-              >
-                restaurant hours
-              </Tab>
-              <Tab
-                className={({ selected }) =>
-                  classNames(
-                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                    selected
-                      ? 'bg-indigo-600 text-white shadow'
-                      : 'text-indigo-700 hover:bg-indigo-200'
-                  )
-                }
-              >
-                tables & layout
-              </Tab>
-              <Tab
-                className={({ selected }) =>
-                  classNames(
-                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                    selected
-                      ? 'bg-indigo-600 text-white shadow'
-                      : 'text-indigo-700 hover:bg-indigo-200'
-                  )
-                }
-              >
-                special days
-              </Tab>
-            </Tab.List>
-            <Tab.Panels>
-              <Tab.Panel>
-                <div className="p-2">
-                  <HoursSetup />
-                </div>
-              </Tab.Panel>
-              <Tab.Panel>
-                <div className="p-2">
-                  <TablesSetup />
-                </div>
-              </Tab.Panel>
-              <Tab.Panel>
-                <div className="p-2">
-                  <SpecialHoursSetup />
-                </div>
-              </Tab.Panel>
-            </Tab.Panels>
-          </Tab.Group>
-          
-          <div className="mt-6 flex justify-end">
-            <Link
-              href="/dashboard"
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-              finish setup
-            </Link>
-          </div>
-        </div>
-      )}
+    <div className="flex items-center justify-center h-screen">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-4">rezzy</h1>
+        <p className="mb-4">restaurant reservation system</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+        <p className="mt-2 text-gray-600">redirecting...</p>
+      </div>
     </div>
   );
 }

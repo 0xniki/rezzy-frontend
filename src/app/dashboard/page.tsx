@@ -15,61 +15,66 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const router = useRouter();
 
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
 
   const [weeklyHours, setWeeklyHours] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [tablesData, hoursData] = await Promise.all([
-          getTables(),
-          getHours()
-        ]);
-        
-        // Add coordinates for visualization
-        const tablesWithCoords = tablesData.map(table => {
-          if (table.location) {
-            try {
-              const [x, y] = table.location.split(',').map(Number);
-              return {
-                ...table,
-                x,
-                y
-              };
-            } catch (err) {
-              return {
-                ...table,
-                x: Math.random() * 400 + 100,
-                y: Math.random() * 300 + 100
-              };
-            }
-          } else {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+    
+    fetchData();
+  }, [router]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [tablesData, hoursData] = await Promise.all([
+        getTables(),
+        getHours()
+      ]);
+      
+      // Add coordinates for visualization
+      const tablesWithCoords = tablesData.map(table => {
+        if (table.location) {
+          try {
+            const [x, y] = table.location.split(',').map(Number);
+            return {
+              ...table,
+              x,
+              y
+            };
+          } catch (err) {
             return {
               ...table,
               x: Math.random() * 400 + 100,
               y: Math.random() * 300 + 100
             };
           }
-        });
-        
-        setTables(tablesWithCoords);
-        setHours(hoursData);
-        
-        // Also fetch the weekly hours for the selected date
-        await fetchWeeklyHours(selectedDate);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [router]);
+        } else {
+          return {
+            ...table,
+            x: Math.random() * 400 + 100,
+            y: Math.random() * 300 + 100
+          };
+        }
+      });
+      
+      setTables(tablesWithCoords);
+      setHours(hoursData);
+      
+      // Also fetch the weekly hours for the selected date
+      await fetchWeeklyHours(selectedDate);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchWeeklyHours = async (date: Date) => {
     try {
@@ -155,22 +160,7 @@ export default function Dashboard() {
   return (
     <div className="py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">restaurant dashboard</h1>
-        <div className="flex space-x-3">
-          <Link
-            href="/reservations"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            manage reservations
-          </Link>
-          
-          <Link
-            href="/"
-            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-          >
-            edit setup
-          </Link>
-        </div>
+        <h1 className="text-3xl font-bold">frali dashboard</h1>
       </div>
       
       {/* Date Navigator Component */}
