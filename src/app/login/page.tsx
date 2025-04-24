@@ -74,24 +74,18 @@ export default function LoginPage() {
           
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="username">
-                username
-              </label>
               <input
                 id="username"
                 type="text"
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
+                placeholder="username"
                 required
               />
             </div>
             
             <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="password">
-                password
-              </label>
               <input
                 id="password"
                 type="password"
@@ -112,9 +106,6 @@ export default function LoginPage() {
             </button>
           </form>
           
-          <div className="mt-4 text-center text-sm text-gray-500">
-            <p>Demo credentials: admin / password</p>
-          </div>
         </div>
       </div>
     </div>

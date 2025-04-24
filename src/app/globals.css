@@ -114,7 +114,7 @@ nav.bg-indigo-600 {
 /* Fix date navigator arrows to be closer to date */
 .bg-white.rounded-lg.shadow.p-4.mb-6 .flex.items-center.justify-between {
   min-height: 38px !important;
-  padding: 0 10% !important;
+  padding: 0 25% !important;
 }
 
 .text-xl.font-bold {

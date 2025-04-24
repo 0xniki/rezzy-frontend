@@ -274,12 +274,6 @@ export default function ReservationForm({ onCancel, selectedDate }: ReservationF
         <div className="text-green-600 text-5xl mb-4">✓</div>
         <h3 className="text-xl font-semibold mb-2">reservation created!</h3>
         <p className="mb-4">The reservation has been successfully created.</p>
-        <button
-          onClick={onCancel}
-          className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-        >
-          back to reservations
-        </button>
       </div>
     );
   }
