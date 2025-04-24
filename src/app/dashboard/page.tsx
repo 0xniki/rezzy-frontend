@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { getTables, getHours, getSpecialHoursByDate, Table, RestaurantHours } from '@/lib/api';
 import DateNavigator from '@/components/DateNavigator';
 import TableReservationsModal from '@/components/TableReservationsModal';
+import TableLayout from '@/components/TableLayout';
+import ReservationSidebar from '@/components/SideBar';
 
 export default function Dashboard() {
   const [tables, setTables] = useState<Table[]>([]);
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
 
   const [weeklyHours, setWeeklyHours] = useState<any[]>([]);
@@ -28,7 +30,22 @@ export default function Dashboard() {
     }
     
     fetchData();
+
+    // Listen for sidebar toggle events from navbar
+    const handleSidebarToggle = (e: CustomEvent) => {
+      setIsSidebarOpen(e.detail.isOpen);
+    };
+
+    window.addEventListener('toggle-sidebar' as any, handleSidebarToggle);
+    
+    return () => {
+      window.removeEventListener('toggle-sidebar' as any, handleSidebarToggle);
+    };
   }, [router]);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   const fetchData = async () => {
     try {
@@ -158,8 +175,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="py-6">
+    <div className="py-6 dashboard-page">
       <div className="flex justify-between items-center mb-6">
+        <button
+          onClick={toggleSidebar}
+          className="md:hidden flex items-center space-x-2 text-gray-400 hover:text-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <span>Today's Reservations</span>
+        </button>
       </div>
       
       {/* Date Navigator Component */}
@@ -243,39 +271,10 @@ export default function Dashboard() {
           </div>
         </div>
       </div> */}
-      
-      <div className="bg-white rounded-lg shadow p-6">
-        <div 
-          className="border border-gray-300 bg-white relative mx-auto"
-          style={{ width: '800px', height: '600px' }}
-        >
-          {tables.map((table) => {
-            const x = typeof table.x === 'number' ? table.x : 100;
-            const y = typeof table.y === 'number' ? table.y : 100;
-            
-            return (
-              <div
-                key={table.id}
-                className={`absolute p-2 rounded-lg border-2 ${
-                  table.is_shared ? 'bg-purple-100 border-purple-400' : 'bg-indigo-100 border-indigo-400'
-                } cursor-pointer hover:shadow-lg transition-shadow duration-200`}
-                style={{ 
-                  width: `${50 + table.max_capacity * 10}px`, 
-                  height: `${50 + table.max_capacity * 5}px`,
-                  left: `${x}px`,
-                  top: `${y}px`
-                }}
-                onClick={() => handleTableClick(table)}
-              >
-                <div className="font-bold text-center">
-                  {table.table_number}
-                </div>
-                <div className="text-xs text-center">
-                  {table.max_capacity} seats
-                </div>
-              </div>
-            );
-          })}
+
+      <div className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        <div className="bg-white rounded-lg shadow p-6 layout-container">
+          <TableLayout tables={tables} onTableClick={handleTableClick} />
         </div>
       </div>
 
@@ -289,6 +288,13 @@ export default function Dashboard() {
           date={selectedDate}
         />
       )}
+
+      {/* Reservation Sidebar */}
+      <ReservationSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 }

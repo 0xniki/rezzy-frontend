@@ -27,6 +27,7 @@ body {
   padding: 0.5rem 1rem !important;
   padding-top: 0 !important;
   padding-bottom: 2rem !important;
+  transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 
 nav + .container {
@@ -50,6 +51,8 @@ nav + .container {
 /* Navbar */
 nav.bg-indigo-600 {
   background-color: var(--nav-background) !important;
+  z-index: 50;
+  position: relative;
 }
 
 /* Date picker as secondary navbar */
@@ -82,21 +85,13 @@ button.text-xl.font-bold.px-4.py-2.rounded:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Restaurant layout */
-.bg-white.rounded-lg.shadow.p-6:last-child {
-  height: calc(100vh - 150px) !important; /* Adjusted height */
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.border.border-gray-300.bg-white.relative.mx-auto {
-  height: 100% !important;
-  width: 100% !important;
-  flex: 1 !important;
-}
 
 /* Cards and backgrounds */
 .bg-white, .bg-gray-50 {
+  background-color: var(--card-background) !important;
+}
+
+.bg-card-background {
   background-color: var(--card-background) !important;
 }
 
@@ -140,6 +135,10 @@ input, select, textarea {
 
 /* Borders */
 .border, .border-t {
+  border-color: var(--border) !important;
+}
+
+.border-border {
   border-color: var(--border) !important;
 }
 
@@ -193,4 +192,82 @@ input, select, textarea {
   background-color: var(--primary) !important;
   color: white !important;
   border-radius: 0.3rem !important;
+}
+
+/* ====== TABLE LAYOUT STYLES ====== */
+.table-layout-container {
+  max-width: 100%;
+  overflow: hidden;
+  height: auto !important;
+  min-height: 400px;
+}
+
+.table-layout-content {
+  transform-origin: top left;
+}
+
+/* ====== PAGE SPECIFIC LAYOUT CONTAINER STYLES ====== */
+.setup-page .layout-container {
+  height: auto !important;
+  min-height: 400px;
+}
+
+.dashboard-page .layout-container {
+  height: calc(100vh - 150px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden;
+}
+
+/* ====== SIDEBAR STYLES ====== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  z-index: 40;
+  margin-top: 64px;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  transform: translateX(-100%);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-content {
+  padding-bottom: 80px; /* Add extra padding at bottom to ensure last item is visible */
+  min-height: calc(100vh - 64px);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 35;
+}
+
+/* ====== MAIN CONTENT STYLES ====== */
+.main-content {
+  transition: padding-left 0.3s ease, width 0.3s ease;
+  padding-left: 0;
+  width: 100%;
+}
+
+.main-content.sidebar-open {
+  padding-left: 280px;
+}
+
+/* On smaller screens, don't shift content but overlay the sidebar */
+@media (max-width: 1024px) {
+  .main-content.sidebar-open {
+    padding-left: 0;
+  }
 }

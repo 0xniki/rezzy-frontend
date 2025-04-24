@@ -7,6 +7,7 @@ import { logoutUser, isUserLoggedIn } from '@/lib/auth';
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   
@@ -19,6 +20,17 @@ export default function Navbar() {
     logoutUser();
     router.push('/login');
   };
+
+  const toggleSidebar = () => {
+    const newState = !isSidebarOpen;
+    setIsSidebarOpen(newState);
+    
+    // Dispatch custom event for other components to listen to
+    const event = new CustomEvent('toggle-sidebar', { 
+      detail: { isOpen: newState } 
+    });
+    window.dispatchEvent(event);
+  };
   
   // Don't show navbar on login page
   if (pathname === '/login') {
@@ -26,9 +38,23 @@ export default function Navbar() {
   }
   
   return (
-    <nav className="bg-indigo-600 text-white p-4">
+    <nav className="bg-indigo-600 text-white p-4 z-50 relative">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-4">
+          {isLoggedIn && (
+            <button 
+              onClick={toggleSidebar} 
+              className="text-indigo-100 hover:text-white"
+              aria-label="Toggle sidebar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+          )}
+          
           <Link href="/" className="text-xl font-bold">rezzy</Link>
           
           {isLoggedIn && (

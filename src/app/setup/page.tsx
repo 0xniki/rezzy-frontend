@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Tab } from '@headlessui/react';
 import HoursSetup from '@/components/HoursSetup';
 import TablesSetup from '@/components/TableSetup';
 import SpecialHoursSetup from '@/components/SpecialHoursSetup';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
