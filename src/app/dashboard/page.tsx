@@ -45,6 +45,12 @@ export default function Dashboard() {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+    
+    // Dispatch event for other components to react
+    const event = new CustomEvent('toggle-sidebar', { 
+      detail: { isOpen: !isSidebarOpen } 
+    });
+    window.dispatchEvent(event);
   };
 
   const fetchData = async () => {
@@ -170,6 +176,16 @@ export default function Dashboard() {
     setSelectedTable(null);
   };
 
+  // Force layout recalculation when sidebar state changes
+  useEffect(() => {
+    // Trigger a resize event after the sidebar transition completes
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [isSidebarOpen]);
+
   if (loading) {
     return <div className="text-center py-4">loading restaurant data...</div>;
   }
@@ -292,7 +308,7 @@ export default function Dashboard() {
       {/* Reservation Sidebar */}
       <ReservationSidebar
         isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
+        onClose={() => toggleSidebar()}
         selectedDate={selectedDate}
       />
     </div>
