@@ -290,7 +290,11 @@ export default function Dashboard() {
 
       <div className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="bg-white rounded-lg shadow p-6 layout-container">
-          <TableLayout tables={tables} onTableClick={handleTableClick} />
+          <TableLayout 
+            tables={tables} 
+            onTableClick={handleTableClick} 
+            selectedDate={selectedDate} 
+          />
         </div>
       </div>
 
