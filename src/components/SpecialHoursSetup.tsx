@@ -168,7 +168,7 @@ export default function SpecialHoursSetup() {
   };
   
   if (loading && specialDays.length === 0) {
-    return <div className="text-center py-4">loading special hours...</div>;
+    return <div className="text-center py-4"></div>;
   }
   
   return (

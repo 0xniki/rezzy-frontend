@@ -97,13 +97,12 @@ export default function ReservationList({
   };
   
   if (loading && reservations.length === 0) {
-    return <div className="text-center py-4">loading reservations...</div>;
+    return <div className="text-center py-4"></div>;
   }
   
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">reservations</h2>
         <button
           onClick={onCreateNew}
           className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"

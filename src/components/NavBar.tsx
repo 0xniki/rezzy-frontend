@@ -8,12 +8,21 @@ import { logoutUser, isUserLoggedIn } from '@/lib/auth';
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   
   useEffect(() => {
     // Check login status when component mounts or pathname changes
     setIsLoggedIn(isUserLoggedIn());
+    
+    // Add scroll event listener
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
   
   const handleLogout = () => {
@@ -40,40 +49,40 @@ export default function Navbar() {
   return (
     <nav className="bg-indigo-600 text-white p-4 z-50 relative">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          {isLoggedIn && (
-            <button 
-              onClick={toggleSidebar} 
-              className="text-indigo-100 hover:text-white"
-              aria-label="Toggle sidebar"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
-            </button>
-          )}
-          
+        {isLoggedIn && (
+          <button 
+            onClick={toggleSidebar} 
+            className="text-indigo-100 hover:text-white sidebar-toggle absolute left-0"
+            aria-label="Toggle sidebar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        )}
+        
+        <div className="flex items-center space-x-4 mx-auto md:mx-0">
           <Link href="/" className="text-xl font-bold">rezzy</Link>
           
           {isLoggedIn && (
-            <div className="hidden md:flex space-x-4">
+            <div className="hidden md:flex space-x-6 ml-10">
               <Link 
                 href="/dashboard" 
-                className={`${pathname === '/dashboard' ? 'text-white font-semibold' : 'text-indigo-100 hover:text-white'}`}
+                className={`nav-link ${pathname === '/dashboard' ? 'active' : 'text-indigo-100 hover:text-white'}`}
               >
                 dashboard
               </Link>
               <Link 
                 href="/reservations" 
-                className={`${pathname === '/reservations' ? 'text-white font-semibold' : 'text-indigo-100 hover:text-white'}`}
+                className={`nav-link ${pathname === '/reservations' ? 'active' : 'text-indigo-100 hover:text-white'}`}
               >
                 reservations
               </Link>
               <Link 
                 href="/setup" 
-                className={`${pathname === '/setup' ? 'text-white font-semibold' : 'text-indigo-100 hover:text-white'}`}
+                className={`nav-link ${pathname === '/setup' ? 'active' : 'text-indigo-100 hover:text-white'}`}
               >
                 setup
               </Link>

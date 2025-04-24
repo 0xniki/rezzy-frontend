@@ -161,7 +161,7 @@ export default function HoursSetup() {
   };
 
   if (loading && hours.length === 0) {
-    return <div className="text-center py-4">loading hours...</div>;
+    return <div className="text-center py-4"></div>;
   }
 
   return (

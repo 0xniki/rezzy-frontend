@@ -202,7 +202,7 @@ export default function TableSetup() {
   };
   
   if (loading && tables.length === 0) {
-    return <div className="text-center py-4">loading tables...</div>;
+    return <div className="text-center py-4"></div>;
   }
   
   return (

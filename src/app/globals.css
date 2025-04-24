@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
 
+/* ====== VARIABLES ====== */
 :root {
   --background: #1a1a1a;
   --foreground: #ffffff;
@@ -10,8 +11,10 @@
   --table-header-bg: #333333;
   --primary: #6366f1;
   --border: #333333;
+  --purple-accent: #d8b4fe;
 }
 
+/* ====== BASE STYLES ====== */
 body {
   background: var(--background);
   color: var(--foreground);
@@ -22,7 +25,7 @@ body {
   font-family: "Montserrat", sans-serif !important;
 }
 
-/* Layout and spacing */
+/* ====== LAYOUT AND SPACING ====== */
 .container.mx-auto.p-4 {
   padding: 0.5rem 1rem !important;
   padding-top: 0 !important;
@@ -48,14 +51,56 @@ nav + .container {
   padding: 1rem !important;
 }
 
-/* Navbar */
+/* ====== NAVBAR STYLES ====== */
 nav.bg-indigo-600 {
   background-color: var(--nav-background) !important;
+  position: sticky;
+  top: 0;
   z-index: 50;
+  transition: all 0.3s ease;
+}
+
+/* Navbar links with purple highlights */
+.nav-link {
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--purple-accent) !important;
+}
+
+.nav-link.active {
+  color: white !important;
+  font-weight: 600;
   position: relative;
 }
 
-/* Date picker as secondary navbar */
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 100%;
+  height: 2px;
+  background-color: var(--purple-accent);
+}
+
+/* Sidebar toggle button - fixed positioning */
+.sidebar-toggle {
+  position: absolute;
+  left: 0;
+  padding-left: 16px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Logo positioning to avoid overlap with toggle */
+.logo-container {
+  margin-left: 40px;
+}
+
+/* ====== DATE PICKER STYLES ====== */
 .bg-white.rounded-lg.shadow.p-4.mb-6 {
   background-color: var(--date-picker-bg) !important;
   border-radius: 0 !important;
@@ -85,7 +130,100 @@ button.text-xl.font-bold.px-4.py-2.rounded:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
+/* ====== SIDEBAR STYLES ====== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 320px;
+  z-index: 40;
+  margin-top: 64px;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  transform: translateX(-100%);
+}
 
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-content {
+  padding-bottom: 80px;
+  min-height: calc(100vh - 64px);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 35;
+}
+
+/* ====== MAIN CONTENT STYLES ====== */
+.main-content {
+  transition: padding-left 0.3s ease, width 0.3s ease;
+  padding-left: 0;
+  width: 100%;
+}
+
+.main-content.sidebar-open {
+  padding-left: 200px;
+}
+
+/* Reduce padding between table layout and sidebar */
+.main-content.sidebar-open .layout-container {
+  padding-left: 1rem !important;
+}
+
+/* On smaller screens, don't shift content but overlay the sidebar */
+@media (max-width: 1024px) {
+  .main-content.sidebar-open {
+    padding-left: 0;
+  }
+}
+
+/* ====== TABLE LAYOUT STYLES ====== */
+.table-layout-container {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  height: auto !important;
+  min-height: 300px !important;
+  flex: 1 !important;
+  position: relative !important;
+}
+
+.table-layout-content {
+  transform-origin: top left !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.layout-container h2 {
+  margin-bottom: 0.75rem !important;
+}
+
+/* ====== PAGE SPECIFIC STYLES ====== */
+.setup-page .layout-container {
+  height: auto !important;
+  min-height: 400px !important;
+  overflow-y: auto !important;
+}
+
+.dashboard-page .layout-container {
+  height: calc(100vh - 150px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden;
+}
+
+/* ====== COMPONENT STYLES ====== */
 /* Cards and backgrounds */
 .bg-white, .bg-gray-50 {
   background-color: var(--card-background) !important;
@@ -123,6 +261,42 @@ input, select, textarea {
   color: var(--foreground) !important;
 }
 
+button.bg-gray-200, 
+a.bg-gray-200,
+[class*="hover:bg-gray-300"],
+[class*="hover:bg-indigo-200"] {
+  background-color: #333333 !important; /* Darker background for unselected buttons */
+  color: rgba(255, 255, 255, 0.7) !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button.bg-gray-200:hover, 
+a.bg-gray-200:hover,
+[class*="hover:bg-gray-300"]:hover,
+[class*="hover:bg-indigo-200"]:hover {
+  background-color: #444444 !important; /* Slightly lighter on hover */
+  color: white !important;
+}
+
+.bg-indigo-100 {
+  background-color: #202020 !important; /* Dark background for tab container */
+}
+
+/* Style for selected tab state to match your indigo-600 */
+.bg-indigo-600, button.bg-indigo-600, a.bg-indigo-600 {
+  background-color: var(--primary) !important;
+  color: white !important;
+}
+
+/* For the tab list specific styling */
+[class*="text-indigo-700"] {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[class*="text-indigo-700"]:hover {
+  color: white !important;
+}
+
 .bg-indigo-600, .bg-purple-600, .bg-green-600 {
   background-color: var(--primary) !important;
   color: white !important; 
@@ -148,7 +322,7 @@ input, select, textarea {
   color: var(--foreground) !important;
 }
 
-/* Status badges */
+/* ====== STATUS BADGES ====== */
 .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.2) !important; }
 .bg-blue-100 { background-color: rgba(59, 130, 246, 0.2) !important; }
 .bg-purple-100 { background-color: rgba(147, 51, 234, 0.2) !important; }
@@ -161,7 +335,7 @@ input, select, textarea {
 .text-green-800 { color: #22c55e !important; }
 .text-red-800 { color: #ef4444 !important; }
 
-/* Make the calendar bigger when opened */
+/* ====== DATEPICKER CUSTOMIZATION ====== */
 .react-datepicker {
   font-size: 1rem !important;
   font-family: "Montserrat", sans-serif !important;
@@ -187,98 +361,8 @@ input, select, textarea {
   padding: 0.5rem 0 !important;
 }
 
-/* Better hover styling for calendar dates */
 .react-datepicker__day:hover {
   background-color: var(--primary) !important;
   color: white !important;
   border-radius: 0.3rem !important;
-}
-
-/* ====== TABLE LAYOUT STYLES ====== */
-.table-layout-container {
-  max-width: 100% !important;
-  overflow: hidden !important;
-  height: auto !important;
-  min-height: 300px !important; /* Slightly reduced to ensure it fits */
-  flex: 1 !important; /* Take up all available space */
-  position: relative !important;
-}
-
-/* Ensure scaling works properly and is contained */
-.table-layout-content {
-  transform-origin: top left !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-}
-
-.layout-container h2 {
-  margin-bottom: 0.75rem !important;
-}
-
-/* ====== PAGE SPECIFIC LAYOUT CONTAINER STYLES ====== */
-.setup-page .layout-container {
-  height: auto !important;
-  min-height: 400px !important;
-  overflow-y: auto !important;
-}
-
-.dashboard-page .layout-container {
-  height: calc(100vh - 150px) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden;
-}
-
-/* ====== SIDEBAR STYLES ====== */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 280px;
-  z-index: 40;
-  margin-top: 64px;
-  transition: transform 0.3s ease;
-  overflow-y: auto;
-  transform: translateX(-100%);
-}
-
-.sidebar.open {
-  transform: translateX(0);
-}
-
-.sidebar-content {
-  padding-bottom: 80px; /* Add extra padding at bottom to ensure last item is visible */
-  min-height: calc(100vh - 64px);
-  max-height: calc(100vh - 64px);
-  overflow-y: auto;
-}
-
-.sidebar-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 35;
-}
-
-/* ====== MAIN CONTENT STYLES ====== */
-.main-content {
-  transition: padding-left 0.3s ease, width 0.3s ease;
-  padding-left: 0;
-  width: 100%;
-}
-
-.main-content.sidebar-open {
-  padding-left: 280px;
-}
-
-/* On smaller screens, don't shift content but overlay the sidebar */
-@media (max-width: 1024px) {
-  .main-content.sidebar-open {
-    padding-left: 0;
-  }
 }
