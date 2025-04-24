@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format, subMinutes, isAfter } from 'date-fns';
 import { getReservations } from '@/lib/api';
+import ReservationForm from '@/components/ReservationForm';
 
 interface ReservationSidebarProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export default function ReservationSidebar({ isOpen, onClose, selectedDate }: Re
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showReservationForm, setShowReservationForm] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,6 +60,16 @@ export default function ReservationSidebar({ isOpen, onClose, selectedDate }: Re
     }
   };
 
+  const handleAddReservation = () => {
+    setShowReservationForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowReservationForm(false);
+    // Refresh reservations
+    fetchReservations();
+  };
+
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'pending':
@@ -96,12 +108,13 @@ export default function ReservationSidebar({ isOpen, onClose, selectedDate }: Re
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">today's reservations</h2>
               <button 
-                onClick={onClose}
-                className="text-gray-500 hover:text-white"
+                onClick={handleAddReservation}
+                className="text-white hover:text-indigo-300 transition-colors"
+                aria-label="Add reservation"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </button>
             </div>
@@ -149,6 +162,30 @@ export default function ReservationSidebar({ isOpen, onClose, selectedDate }: Re
           </div>
         </div>
       </div>
+
+      {/* Reservation Form Modal */}
+      {showReservationForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-card-background rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">create new reservation</h2>
+                <button 
+                  onClick={handleCloseForm}
+                  className="text-gray-500 hover:text-white"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              
+              <ReservationForm onCancel={handleCloseForm} selectedDate={selectedDate} />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -32,15 +32,6 @@ export default function SetupPage() {
 
   return (
     <div className="py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">restaurant setup</h1>
-        <Link
-          href="/dashboard"
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
-        >
-          back to dashboard
-        </Link>
-      </div>
       
       <div className="bg-white rounded-lg shadow p-6">
         <Tab.Group>
